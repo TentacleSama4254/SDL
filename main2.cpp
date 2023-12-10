@@ -1,8 +1,6 @@
 #include <SDL2/SDL.h>
 #include <vector>
 #include <array>
-#include <iostream>
-
 using namespace std;
 
 int main(int argc, char* argv[]) {
@@ -32,96 +30,93 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    class Square {
-    public:
-        float x, y;
-        Square(int _x, int _y) {
-            this->x = _x;
-            this->y = _y;
-        }
-
-        void draw(SDL_Renderer* renderer) {
-            SDL_Rect square = { static_cast<int> (this->x), static_cast<int>(this->y), 50, 50 };
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-            SDL_RenderFillRect(renderer, &square);
-        };
-    };
-
     class Snake {
     public:
-        float headX = 0, headY = 0;
-        float dx = 0.5, dy = 0.5;
-        int length = 2;
+        int headX, headY;
+        int dx, dy;
+        int length = 0;
         vector<array<double, 2>> pos;
+
+        Snake();
 
         void move() {
             headX += dx;
             headY += dy;
 
             // Update the position of each segment of the snake's body
-            pos.push_back({ 0,0 });
-            for (int i = (length - 1); i > 0; i--) {
+            for (int i = length - 1; i > 0; i--) {
                 pos[i] = pos[i - 1];
             }
             pos[0] = { headX, headY };
-            cout << headX << " " << headY << endl;
         };
 
         void user_move(SDL_Keycode key) {
             switch (key) {
             case SDLK_UP:
-                this->dy = -0.5;
+                this->dy = -1;
                 this->dx = 0;
                 break;
             case SDLK_DOWN:
-                this->dy = 0.5;
+                this->dy = 1;
                 this->dx = 0;
                 break;
             case SDLK_LEFT:
-                this->dx = -0.5;
+                this->dx = -1;
                 this->dy = 0;
                 break;
             case SDLK_RIGHT:
-                this->dx = 0.5;
+                this->dx = 1;
                 this->dy = 0;
                 break;
             }
         };
 
-        void draw(SDL_Renderer* renderer) {
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            SDL_RenderClear(renderer);
+        // void draw() {
+        //     for (int i=0; i<this->length;i++){
+        //         SDL_Rect square = { this->pos[i][0],this->pos[i][1], 50, 50 };
 
-            for (int i = 0; i < this->pos.size(); i++) {
-                Square sq(this->pos[i][0], this->pos[i][1]);
-                sq.draw(renderer);
-            }
-
-            SDL_RenderPresent(renderer);
-        }
+        //         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        //         SDL_RenderFillRect(renderer, &square);
+        //     }
+        // }
 
     };
 
     // Event loop
     bool running = true;
-    Snake mySnake;
-
     while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = false;
             }
             else if (event.type == SDL_KEYDOWN) {
-                mySnake.user_move(event.key.keysym.sym);
+                switch (event.key.keysym.sym) {
+                case SDLK_UP:    vy -= 1; break;
+                case SDLK_DOWN:  vy += 1; break;
+                case SDLK_LEFT:  vx -= 1; break;
+                case SDLK_RIGHT: vx += 1; break;
+                }
             }
         }
+
+        // Update square position
+        square.x += vx;
+        square.y += vy;
+
+        // if (vx > 0) vx -= 0.01; else if (vx < 0) vx += 0.01;
+        // if (vy > 0) vy -= 0.01; else if (vy < 0) vy += 0.01;
+
+        // Check for collision with window boundaries
+        if (square.x < 0 || square.x + square.w > 2400) vx = -0.95 * vx;
+        if (square.y < 0 || square.y + square.h > 1800) vy = -0.95 * vy;
 
         // Clear screen
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        mySnake.move();
-        mySnake.draw(renderer);
+        // Draw square
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderFillRect(renderer, &square);
 
         // Update screen
         SDL_RenderPresent(renderer);
