@@ -54,18 +54,21 @@ int main(int argc, char* argv[]) {
         int length = 2;
         vector<array<double, 2>> pos;
 
+        Snake() {
+            // Initialize the pos vector with the correct size
+            pos = vector<array<double, 2>>(length, { headX, headY });
+        }
         void move() {
             headX += dx;
             headY += dy;
 
-            // Update the position of each segment of the snake's body
-            pos.push_back({ 0,0 });
-            for (int i = (length - 1); i > 0; i--) {
+            // Shift the positions of the body segments
+            for (int i = length - 1; i > 0; i--) {
                 pos[i] = pos[i - 1];
             }
+            // Update the head's position
             pos[0] = { headX, headY };
-            cout << headX << " " << headY << endl;
-        };
+        }
 
         void user_move(SDL_Keycode key) {
             switch (key) {
@@ -88,16 +91,14 @@ int main(int argc, char* argv[]) {
             }
         };
 
+        //change
+
         void draw(SDL_Renderer* renderer) {
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            SDL_RenderClear(renderer);
-
-            for (int i = 0; i < this->pos.size(); i++) {
-                Square sq(this->pos[i][0], this->pos[i][1]);
-                sq.draw(renderer);
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            for (auto& p : pos) {
+                SDL_Rect square = { static_cast<int>(p[0]), static_cast<int>(p[1]), 50, 50 };
+                SDL_RenderFillRect(renderer, &square);
             }
-
-            SDL_RenderPresent(renderer);
         }
 
     };
